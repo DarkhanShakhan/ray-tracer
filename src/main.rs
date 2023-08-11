@@ -1,6 +1,9 @@
 use indicatif::{ProgressBar, ProgressStyle};
 mod color;
+mod hittable;
 mod ray;
+mod sphere;
+mod hittable_list;
 use prima::geom::Vec3;
 
 fn main() {
@@ -47,26 +50,26 @@ fn main() {
 }
 
 fn ray_color(r: ray::Ray) -> Vec3 {
-    let t = hit_sphere(Vec3::new(0.0,0.0,-1.0), 0.5, r);
+    let t = hit_sphere(Vec3::new(0.0, 0.0, -1.0), 0.5, r);
     if t > 0.0 {
-        let n = (r.at(t) -Vec3::new(0.0,0.0,-1.0)).normalize();
-        return 0.5 *Vec3::new(n.x +1.0,n.y +1.0,n.z + 1.0)
+        let n = (r.at(t) - Vec3::new(0.0, 0.0, -1.0)).normalize();
+        return 0.5 * Vec3::new(n.x + 1.0, n.y + 1.0, n.z + 1.0);
     }
     let unit_direction = r.direction().normalize();
     let a = 0.5 * (unit_direction.y + 1.0);
     (1.0 - a) * Vec3::new(1.0, 1.0, 1.0) + a * Vec3::new(0.5, 0.7, 1.0)
 }
 
-fn hit_sphere(center: Vec3, radius: f32, r:ray::Ray) -> f32 {
+fn hit_sphere(center: Vec3, radius: f32, r: ray::Ray) -> f32 {
     let oc = r.origin() - center;
     let a = r.direction().length_squared();
-    let half_b  =  oc.dot(r.direction());
-    let c = oc.length_squared() - radius*radius;
-    let discriminant = half_b *half_b - a*c;
-    if discriminant <  0.0 {
-        return -1.0
+    let half_b = oc.dot(r.direction());
+    let c = oc.length_squared() - radius * radius;
+    let discriminant = half_b * half_b - a * c;
+    if discriminant < 0.0 {
+        return -1.0;
     }
-    (-half_b-discriminant.sqrt()) / a
+    (-half_b - discriminant.sqrt()) / a
 }
 
 fn ppm_image(image_width: i32, image_height: i32) {
