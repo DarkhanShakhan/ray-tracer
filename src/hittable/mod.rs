@@ -1,9 +1,12 @@
+use crate::interval::Interval;
+
 use super::ray;
 use prima::geom::Vec3;
 pub trait Hittable {
-    fn hit(&self, r: &ray::Ray, ray_tmin: f32, ray_tmax: f32, rec: &mut HitRecord) -> bool;
+    fn hit(&self, r: &ray::Ray, ray_t: Interval, rec: &mut HitRecord) -> bool;
 }
 
+#[derive(Copy, Clone, Default)]
 pub struct HitRecord {
     pub p: Vec3,
     pub normal: Vec3,
