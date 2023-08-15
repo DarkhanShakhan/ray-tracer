@@ -5,6 +5,7 @@ mod hittable_list;
 mod interval;
 mod ray;
 mod sphere;
+mod vector;
 
 use prima::geom::Vec3;
 
@@ -22,6 +23,7 @@ fn main() {
 
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
-    cam.samples_per_pixel = 10;
+    cam.samples_per_pixel = 50;
+    cam.max_depth = 50;
     cam.render(&world);
 }

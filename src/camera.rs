@@ -1,6 +1,7 @@
 use crate::color;
 use crate::interval::Interval;
 use crate::ray::{self, Ray};
+use crate::vector;
 use derivative::Derivative;
 use indicatif::ProgressBar;
 use prima::geom::Vec3;
@@ -17,6 +18,8 @@ pub struct Camera {
     pub image_width: i32,
     #[derivative(Default(value = "10"))]
     pub samples_per_pixel: i32,
+    #[derivative(Default(value = "10"))]
+    pub max_depth: i32,
     image_height: i32,
     center: Vec3,
     pixel00_loc: Vec3,
@@ -35,7 +38,7 @@ impl Camera {
                 let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
                 for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
-                    pixel_color += self.ray_color(&r, world);
+                    pixel_color += self.ray_color(&r, self.max_depth, world);
                 }
                 color::write_color(pixel_color, self.samples_per_pixel);
             }
@@ -68,10 +71,14 @@ impl Camera {
         self.pixel00_loc = viewport_upper_left + 0.5 * (self.pixel_delta_u + self.pixel_delta_v);
     }
 
-    fn ray_color(&self, r: &ray::Ray, world: &dyn hittable::Hittable) -> Vec3 {
+    fn ray_color(&self, r: &ray::Ray, depth: i32, world: &dyn hittable::Hittable) -> Vec3 {
         let mut rec: hittable::HitRecord = hittable::HitRecord::default();
-        if world.hit(r, Interval::new(0.0, f32::INFINITY), &mut rec) {
-            return 0.5 * (rec.normal + Vec3::new(1.0, 1.0, 1.0));
+        if depth <= 0 {
+            return Vec3::new(0.0, 0.0, 0.0);
+        }
+        if world.hit(r, Interval::new(0.001, f32::INFINITY), &mut rec) {
+            let direction = rec.normal + vector::random_unit_vector();
+            return 0.6 * (self.ray_color(&Ray::new(rec.p, direction), depth - 1, world));
         }
         let unit_direction = r.direction().normalize();
         let a = 0.5 * (unit_direction.y + 1.0);
